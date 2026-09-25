@@ -18,7 +18,12 @@ export const getProjectBySlug = createServerFn({ method: "GET" })
         },
       },
     });
-    const { data: row, error } = await sb.from("projects").select("*").eq("slug", data.slug).maybeSingle();
+    const { data: row, error } = await sb
+      .from("projects")
+      .select("*")
+      .eq("slug", data.slug)
+      .eq("public_enabled", true)
+      .maybeSingle();
     if (error) {
       console.error(error);
       throw new Error("Could not load project");

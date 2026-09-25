@@ -20,6 +20,19 @@ export const projectsQuery = queryOptions({
   },
 });
 
+export const publicProjectsQuery = queryOptions({
+  queryKey: ["projects", "public"],
+  queryFn: async (): Promise<Project[]> => {
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*")
+      .eq("public_enabled", true)
+      .order("priority", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  },
+});
+
 export const CFO_PACK_SLUG = "cfo-fp-a-capability-pack";
 
 export function slugify(s: string) {

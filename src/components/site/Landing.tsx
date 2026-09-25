@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { accessLabel, CFO_PACK_SLUG, projectsQuery, uniqueValues, type Project } from "@/lib/projects";
+import { accessLabel, CFO_PACK_SLUG, publicProjectsQuery, uniqueValues, type Project } from "@/lib/projects";
 import heroImg from "@/assets/zahid-hero-clean.jpg";
 import aboutImg from "@/assets/zahid-about.jpg";
 
@@ -28,7 +28,7 @@ function CorporateMark({ company, qualification, kind }: { company: string; qual
 export function Landing({ showPhoto }: { showPhoto: boolean }) {
   const [navOpen, setNavOpen] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
-  const { data: projects = [], isLoading } = useQuery(projectsQuery);
+  const { data: projects = [], isLoading } = useQuery(publicProjectsQuery);
   const openProject = projects.find((p) => p.id === openId) ?? null;
   const cfoPack = projects.find((p) => p.slug === CFO_PACK_SLUG);
 
