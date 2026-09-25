@@ -44,3 +44,11 @@ img,svg{max-width:100%}
 @media(max-width:560px){.actions{flex-wrap:wrap}.actions .btn{flex:1 1 100%}.hero h1{font-size:40px}.modal-hero{padding:40px 20px 28px}.modal-grid{padding:20px}.modal-kicker{padding-right:48px}.contact-links{flex-direction:column;align-items:flex-start}.adm-wrap{padding:14px}.adm-top{flex-wrap:wrap;gap:10px;padding:12px 16px}.auth-box{margin:6vh 14px;padding:22px}.promise{padding:22px}.section-head h2{overflow-wrap:anywhere}footer{flex-direction:column;gap:12px;text-align:center}}
 @media(min-width:561px) and (max-width:900px){.modal-kicker{padding-right:48px}}
 @media(min-width:1600px){:root{--max:1400px}}
+/* Case study page */
+.case-hero{padding:70px max(24px,calc((100vw - var(--max))/2)) 55px}.case-hero h1{font-family:"Libre Caslon Display",Georgia,serif;font-weight:400;font-size:clamp(34px,5vw,60px);line-height:1.05;margin:8px 0 14px}.case-lede{max-width:720px;color:#e6dddd;font-size:17px}
+.crumbs{font-size:12px;color:#cdb9bb;margin-bottom:22px}.crumbs a{color:#d8b66f;text-decoration:none}
+.case-grid{max-width:var(--max);margin:0 auto;padding:50px 24px 60px}
+button.plain{background:none;border:0;padding:0;cursor:zoom-in;display:block;width:100%}
+.lightbox{position:fixed;inset:0;z-index:200;background:#050809ee;display:flex;align-items:center;justify-content:center;padding:40px}.lightbox img{max-width:100%;max-height:85vh;border-radius:6px;box-shadow:0 20px 60px #000a}.lightbox .close{position:fixed;top:16px;right:16px;float:none;margin:0}.lb-nav{position:fixed;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:0;background:#ffffff22;color:#fff;font-size:30px;cursor:pointer}.lb-nav.prev{left:14px}.lb-nav.next{right:14px}.lb-count{position:fixed;bottom:18px;color:#ddd;font-size:12px}
+@media(max-width:560px){.hide-sm{display:none}.case-hero{padding:45px 20px 35px}.lightbox{padding:14px}}
+@media(max-width:900px){.site-header .nav[style]{position:static;padding:0;background:none;border:0;flex-direction:row;gap:14px}}
