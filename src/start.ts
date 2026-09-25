@@ -1,7 +1,6 @@
 import { createStart, createCsrfMiddleware, createMiddleware } from "@tanstack/react-start";
 
 import { renderErrorPage } from "./lib/error-page";
-import { sessionMiddleware } from "@/lib/auth-middleware";
 
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
@@ -25,7 +24,9 @@ const csrfMiddleware = createCsrfMiddleware({
   filter: (ctx) => ctx.handlerType === "serverFn",
 });
 
+// NOTE: session resolution is on-demand (src/lib/auth-middleware.ts →
+// resolveAuthFromRequest); admin server routes authorize via
+// requireAdminFromRequest. No global function middleware runs per request.
 export const startInstance = createStart(() => ({
-  functionMiddleware: [sessionMiddleware],
   requestMiddleware: [errorMiddleware, csrfMiddleware],
 }));

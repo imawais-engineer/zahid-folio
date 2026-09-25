@@ -46,20 +46,25 @@ export const Route = createFileRoute("/admin")({
 
 type SessionUser = { id: string; email: string; isAdmin: boolean };
 
+// Session and projects are fetched in parallel by react-query (both queries
+// start immediately), so signing in renders the CMS in one round trip.
+const sessionQuery = {
+  queryKey: ["session"] as const,
+  queryFn: async (): Promise<SessionUser | null> => {
+    const res = await fetch("/api/auth/session");
+    if (!res.ok) return null;
+    const body: unknown = await res.json();
+    return body && typeof body === "object" && "user" in body
+      ? ((body as { user: SessionUser | null }).user ?? null)
+      : null;
+  },
+  retry: false,
+  staleTime: 5 * 60 * 1000,
+};
+
 function AdminGate() {
   const router = useRouter();
-  const { data: session, isLoading } = useQuery({
-    queryKey: ["session"],
-    queryFn: async (): Promise<SessionUser | null> => {
-      const res = await fetch("/api/auth/session");
-      if (!res.ok) return null;
-      const body: unknown = await res.json();
-      return body && typeof body === "object" && "user" in body
-        ? ((body as { user: SessionUser | null }).user ?? null)
-        : null;
-    },
-    retry: false,
-  });
+  const { data: session, isLoading } = useQuery(sessionQuery);
 
   if (isLoading) return <div className="adm"><p style={{ padding: 40 }}>Loading…</p></div>;
   if (!session) return <SignIn onSignedIn={() => router.invalidate()} />;
@@ -83,6 +88,7 @@ function AdminGate() {
 }
 
 function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
+  const qc = useQueryClient();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState<string | null>(null);
@@ -110,6 +116,9 @@ function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
         return;
       }
       setBusy(false);
+      // Cookie is set — warm the projects list in parallel with the redirect
+      // so the CMS renders its data immediately instead of waterfalling.
+      void qc.prefetchQuery(projectsQuery);
       onSignedIn();
     } catch {
       setPassword("");
