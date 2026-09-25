@@ -47,7 +47,6 @@ export function Landing({ showPhoto }: { showPhoto: boolean }) {
         </button>
         <nav className={`nav ${navOpen ? "open" : ""}`} onClick={() => setNavOpen(false)}>
           <a href="#help">How I Help</a>
-          <Link to="/fractional-cfo">Fractional CFO</Link>
           <a href="#work">Work</a>
           <a href="#experience">Experience</a>
           <a href="#proof">Testimonials</a>
@@ -114,7 +113,6 @@ export function Landing({ showPhoto }: { showPhoto: boolean }) {
                 <h3>{t}</h3>
                 <p>{d}</p>
                 {t === "CFO Advisory" && (
-                  <Link className="service-link" to="/fractional-cfo">Explore Fractional CFO services →</Link>
                 )}
               </article>
             ))}
