@@ -1,0 +1,19 @@
+# Test-only override: distinct container/volume names, no Traefik labels,
+# app published only to localhost:3001 for verification runs.
+# Usage: docker compose -p portfolio-test -f docker-compose.yml -f docker-compose.test.yml up -d
+services:
+  portfolio:
+    container_name: alpha-insights-portfolio-test
+    labels:
+      - traefik.enable=false
+    ports:
+      - "127.0.0.1:3001:3000"
+
+  portfolio-postgres:
+    container_name: alpha-insights-portfolio-postgres-test
+
+volumes:
+  postgres_data:
+    name: alpha-insights-portfolio-postgres-test-data
+  uploads_data:
+    name: alpha-insights-portfolio-uploads-test

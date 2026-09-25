@@ -1,5 +1,4 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import type { User } from "@supabase/supabase-js";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
@@ -19,8 +18,8 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { projectsQuery, slugify, uniqueValues, type Project } from "@/lib/projects";
+import type { ProjectDraft } from "@/lib/projects.types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,10 +30,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 export const Route = createFileRoute("/admin")({
   staticData: { sitemap: false },
   ssr: false,
-  beforeLoad: async () => {
-    const { data, error } = await supabase.auth.getUser();
-    return { user: error ? null : data.user };
-  },
   head: () => ({
     meta: [
       { title: "Portfolio CMS | Alpha Insights" },
@@ -49,40 +44,78 @@ export const Route = createFileRoute("/admin")({
   component: AdminGate,
 });
 
+type SessionUser = { id: string; email: string; isAdmin: boolean };
+
 function AdminGate() {
-  const { user } = Route.useRouteContext();
-  return user ? <AdminPage user={user} /> : <SignIn />;
+  const router = useRouter();
+  const { data: session, isLoading } = useQuery({
+    queryKey: ["session"],
+    queryFn: async (): Promise<SessionUser | null> => {
+      const res = await fetch("/api/auth/session");
+      if (!res.ok) return null;
+      const body: unknown = await res.json();
+      return body && typeof body === "object" && "user" in body
+        ? ((body as { user: SessionUser | null }).user ?? null)
+        : null;
+    },
+    retry: false,
+  });
+
+  if (isLoading) return <div className="adm"><p style={{ padding: 40 }}>Loading…</p></div>;
+  if (!session) return <SignIn onSignedIn={() => router.invalidate()} />;
+
+  // Authorization is enforced server-side on every API call; this client check
+  // only renders a friendly message for non-admin accounts.
+  if (!session.isAdmin)
+    return (
+      <div className="adm">
+        <div className="auth-box">
+          <h1 style={{ margin: 0 }}>No admin access</h1>
+          <p>This account ({session.email}) is not an administrator.</p>
+          <Button className="cms-button primary" onClick={async () => { await fetch("/api/auth/logout", { method: "POST" }); await router.invalidate(); }}>
+            <LogOut /> Sign out
+          </Button>
+        </div>
+      </div>
+    );
+
+  return <AdminPage user={session} />;
 }
 
-function SignIn() {
-  const router = useRouter();
+function SignIn({ onSignedIn }: { onSignedIn: () => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [fails, setFails] = useState(0);
-  const [lockedUntil, setLockedUntil] = useState(0);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (Date.now() < lockedUntil) {
-      setErr("Too many attempts. Please wait a minute and try again.");
-      return;
-    }
     setBusy(true);
     setErr(null);
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    setPassword("");
-    if (error) {
-      const n = fails + 1;
-      setFails(n);
-      if (n >= 5) { setLockedUntil(Date.now() + 60_000); setFails(0); }
-      setErr("Email or password is incorrect.");
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), password }),
+      });
+      setPassword("");
+      if (!res.ok) {
+        const body: unknown = await res.json().catch(() => null);
+        const message =
+          body && typeof body === "object" && "error" in body
+            ? String((body as { error: unknown }).error)
+            : "Email or password is incorrect.";
+        setErr(res.status === 429 ? message : "Email or password is incorrect.");
+        setBusy(false);
+        return;
+      }
       setBusy(false);
-      return;
+      onSignedIn();
+    } catch {
+      setPassword("");
+      setErr("Sign-in failed. Please try again.");
+      setBusy(false);
     }
-    setBusy(false);
-    await router.invalidate();
   }
 
   return (
@@ -103,27 +136,32 @@ function SignIn() {
   );
 }
 
-type Draft = Omit<Project, "id" | "created_at" | "updated_at"> & { id?: string; updated_at?: string };
-
-const empty = (priority: number): Draft => ({
+const empty = (priority: number): ProjectDraft => ({
   slug: null, title: "", short: "", platforms: [], capabilities: [], industries: [], tags: [],
   access: "interactive", thumbnail_url: null, screenshots: [], model_url: "", challenge: "",
   approach: "", value: "", priority, featured: false, is_template: false,
   public_enabled: true,
 });
 
-function AdminPage({ user }: { user: User }) {
+type ApiError = { error?: string; conflict?: boolean };
+
+async function apiJson<T>(res: Response): Promise<T> {
+  const body: unknown = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const info = body as ApiError;
+    const error = new Error(info?.error ?? `Request failed (${res.status})`) as Error & { conflict?: boolean; status?: number };
+    error.conflict = res.status === 409;
+    error.status = res.status;
+    throw error;
+  }
+  return body as T;
+}
+
+function AdminPage({ user }: { user: SessionUser }) {
   const qc = useQueryClient();
   const router = useRouter();
-  const { data: isAdmin, isLoading: roleLoading } = useQuery({
-    queryKey: ["is-admin", user.id],
-    queryFn: async () => {
-      const { data } = await supabase.rpc("has_role", { _user_id: user.id, _role: "admin" });
-      return !!data;
-    },
-  });
   const { data: projects = [] } = useQuery(projectsQuery);
-  const [draft, setDraft] = useState<Draft | null>(null);
+  const [draft, setDraft] = useState<ProjectDraft | null>(null);
   const [msg, setMsg] = useState<{ t: string; err?: boolean } | null>(null);
   const [busy, setBusy] = useState(false);
   const [slugTouched, setSlugTouched] = useState(false);
@@ -133,7 +171,7 @@ function AdminPage({ user }: { user: User }) {
   async function signOut() {
     await qc.cancelQueries();
     qc.clear();
-    await supabase.auth.signOut();
+    await fetch("/api/auth/logout", { method: "POST" });
     await router.invalidate();
   }
 
@@ -146,15 +184,17 @@ function AdminPage({ user }: { user: User }) {
     const results = await Promise.all(
       ordered.map((p, i) => {
         const pr = (n - i) * 10;
-        return p.priority === pr ? null : supabase.from("projects").update({ priority: pr }).eq("id", p.id).select("id, priority, updated_at").single();
+        if (p.priority === pr) return Promise.resolve(null);
+        return fetch("/api/admin/projects", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...p, priority: pr, revision: p.revision }),
+        }).then((r) => apiJson<{ project: Project }>(r)).catch(() => ({ error: true }));
       }),
     );
-    const failed = results.find((r) => r?.error);
-    if (failed?.error) setMsg({ t: `Reorder failed: ${failed.error.message}`, err: true });
+    const failed = results.find((r) => r !== null && typeof r === "object" && "error" in r);
+    if (failed) setMsg({ t: "Reorder failed: one or more updates were rejected.", err: true });
     else setMsg({ t: "Order updated on the live portfolio." });
-    // keep the open draft in sync so a later save isn't flagged as a conflict
-    const mine = results.find((r) => r?.data && r.data.id === draft?.id)?.data;
-    if (mine) setDraft((d) => (d ? { ...d, priority: mine.priority, updated_at: mine.updated_at } : d));
     await refresh();
   }
 
@@ -183,46 +223,67 @@ function AdminPage({ user }: { user: User }) {
     if (!draft) return;
     if (!draft.title.trim()) return setMsg({ t: "Title is required.", err: true });
     setBusy(true);
-    const { id, updated_at, ...row } = draft;
+    const { id, revision, ...row } = draft;
     const payload = {
       ...row,
       title: row.title.trim(),
       slug: slugify(row.slug?.trim() || row.title),
       model_url: row.model_url?.trim() || null,
     };
-    let res;
-    if (id) {
-      // Only update if nobody else changed the row since it was opened (no silent overwrites)
-      let q = supabase.from("projects").update(payload).eq("id", id);
-      if (updated_at) q = q.eq("updated_at", updated_at);
-      res = await q.select().maybeSingle();
-      if (!res.error && !res.data) {
-        setBusy(false);
-        return setMsg({ t: "This project was changed elsewhere since you opened it. Re-open it from the list to load the latest version, then re-apply your edits.", err: true });
+    try {
+      if (id) {
+        // Only update if nobody else changed the row since it was opened (no silent overwrites)
+        const res = await fetch("/api/admin/projects", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...payload, id, revision }),
+        });
+        const data = await apiJson<{ project?: Project; conflict?: boolean; error?: string }>(res);
+        if (data.conflict || !data.project) {
+          setBusy(false);
+          return setMsg({ t: "This project was changed elsewhere since you opened it. Re-open it from the list to load the latest version, then re-apply your edits.", err: true });
+        }
+        setMsg({
+          t: data.project.public_enabled
+            ? `Saved “${data.project.title}” — it is enabled on the public site.`
+            : `Saved “${data.project.title}” — it remains private and CMS-only.`,
+        });
+        setDraft({ ...data.project });
+        setSlugTouched(true);
+      } else {
+        const res = await fetch("/api/admin/projects", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await apiJson<{ project: Project }>(res);
+        setMsg({
+          t: data.project.public_enabled
+            ? `Saved “${data.project.title}” — it is enabled on the public site.`
+            : `Saved “${data.project.title}” — it remains private and CMS-only.`,
+        });
+        setDraft({ ...data.project });
+        setSlugTouched(true);
       }
-    } else {
-      res = await supabase.from("projects").insert(payload).select().single();
+      setBusy(false);
+      refresh();
+    } catch (error) {
+      setBusy(false);
+      const e = error as Error & { conflict?: boolean };
+      const m = e.conflict
+        ? "That slug is already used by another project — choose a different one."
+        : e.message;
+      setMsg({ t: `Save failed: ${m}`, err: true });
     }
-    setBusy(false);
-    if (res.error) {
-      const m = res.error.code === "23505" ? "That slug is already used by another project — choose a different one." : res.error.message;
-      return setMsg({ t: `Save failed: ${m}`, err: true });
-    }
-    if (!res.data) return;
-    setMsg({
-      t: res.data.public_enabled
-        ? `Saved “${res.data.title}” — it is enabled on the public site.`
-        : `Saved “${res.data.title}” — it remains private and CMS-only.`,
-    });
-    setDraft({ ...res.data });
-    setSlugTouched(true);
-    refresh();
   }
 
   async function remove() {
     if (!draft?.id || !confirm(`Delete "${draft.title}"? This cannot be undone.`)) return;
-    const { error } = await supabase.from("projects").delete().eq("id", draft.id);
-    if (error) return setMsg({ t: `Delete failed: ${error.message}`, err: true });
+    const res = await fetch(`/api/admin/projects?id=${encodeURIComponent(draft.id)}`, { method: "DELETE" });
+    if (!res.ok) {
+      const body = (await res.json().catch(() => ({}))) as ApiError;
+      return setMsg({ t: `Delete failed: ${body.error ?? res.status}`, err: true });
+    }
     setMsg({ t: `Deleted “${draft.title}”.` });
     setDraft(null);
     refresh();
@@ -230,38 +291,70 @@ function AdminPage({ user }: { user: User }) {
 
   async function setPublicVisibility(project: Project, enabled: boolean) {
     setBusy(true);
-    const { data, error } = await supabase
-      .from("projects")
-      .update({ public_enabled: enabled })
-      .eq("id", project.id)
-      .eq("updated_at", project.updated_at)
-      .select()
-      .maybeSingle();
-    setBusy(false);
-    if (error) return setMsg({ t: `Visibility update failed: ${error.message}`, err: true });
-    if (!data) {
+    try {
+      const res = await fetch("/api/admin/projects", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: project.id,
+          slug: project.slug,
+          title: project.title,
+          short: project.short,
+          platforms: project.platforms,
+          capabilities: project.capabilities,
+          industries: project.industries,
+          tags: project.tags,
+          access: project.access,
+          thumbnail_url: project.thumbnail_url,
+          screenshots: project.screenshots,
+          model_url: project.model_url,
+          challenge: project.challenge,
+          approach: project.approach,
+          value: project.value,
+          priority: project.priority,
+          featured: project.featured,
+          is_template: project.is_template,
+          public_enabled: enabled,
+          revision: project.revision,
+        }),
+      });
+      const data = await apiJson<{ project?: Project; conflict?: boolean }>(res);
+      setBusy(false);
+      if (data.conflict || !data.project) {
+        await refresh();
+        return setMsg({ t: "This project changed elsewhere. The latest version has been loaded; please try again.", err: true });
+      }
+      qc.setQueryData<Project[]>(projectsQuery.queryKey, (current) =>
+        current?.map((item) => (item.id === data.project!.id ? data.project! : item)),
+      );
+      setDraft((current) =>
+        current?.id === data.project!.id
+          ? { ...current, public_enabled: data.project!.public_enabled, updated_at: data.project!.updated_at }
+          : current,
+      );
+      setMsg({
+        t: enabled
+          ? `“${data.project.title}” is now enabled and available on the public site.`
+          : `“${data.project.title}” is disabled. It remains editable here but is no longer publicly accessible.`,
+      });
+    } catch (error) {
+      setBusy(false);
+      const e = error as Error & { conflict?: boolean };
+      setMsg({
+        t: e.conflict
+          ? "This project changed elsewhere. The latest version has been loaded; please try again."
+          : `Visibility update failed: ${e.message}`,
+        err: true,
+      });
       await refresh();
-      return setMsg({ t: "This project changed elsewhere. The latest version has been loaded; please try again.", err: true });
     }
-    qc.setQueryData<Project[]>(projectsQuery.queryKey, (current) =>
-      current?.map((item) => (item.id === data.id ? data : item)),
-    );
-    setDraft((current) =>
-      current?.id === data.id
-        ? { ...current, public_enabled: data.public_enabled, updated_at: data.updated_at }
-        : current,
-    );
-    setMsg({
-      t: enabled
-        ? `“${data.title}” is now enabled and available on the public site.`
-        : `“${data.title}” is disabled. It remains editable here but is no longer publicly accessible.`,
-    });
   }
 
   async function upload(files: FileList | null): Promise<string[]> {
     if (!files?.length) return [];
     setBusy(true);
     const urls: string[] = [];
+    const form = new FormData();
     for (const f of Array.from(files)) {
       if (!f.type.startsWith("image/")) {
         setMsg({ t: `“${f.name}” is not an image and was not uploaded.`, err: true });
@@ -271,29 +364,23 @@ function AdminPage({ user }: { user: User }) {
         setMsg({ t: `“${f.name}” is larger than 10 MB and was not uploaded.`, err: true });
         continue;
       }
-      const path = `${crypto.randomUUID()}-${f.name.replace(/[^\w.-]/g, "_")}`;
-      const up = await supabase.storage.from("portfolio").upload(path, f, { contentType: f.type });
-      if (up.error) { setMsg({ t: up.error.message, err: true }); continue; }
-      const s = await supabase.storage.from("portfolio").createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
-      if (s.data) urls.push(s.data.signedUrl);
+      form.append("files", f);
+    }
+    if (form.getAll("files").length > 0) {
+      try {
+        const res = await fetch("/api/admin/upload", { method: "POST", body: form });
+        const data = await apiJson<{ urls?: string[]; error?: string }>(res);
+        if (data.urls) urls.push(...data.urls);
+        if (data.error) setMsg({ t: data.error, err: true });
+      } catch (error) {
+        setMsg({ t: error instanceof Error ? error.message : "Upload failed", err: true });
+      }
     }
     setBusy(false);
     return urls;
   }
 
-  if (roleLoading) return <div className="adm"><p style={{ padding: 40 }}>Loading…</p></div>;
-  if (!isAdmin)
-    return (
-      <div className="adm">
-        <div className="auth-box">
-          <h1 style={{ margin: 0 }}>No admin access</h1>
-          <p>This account ({user.email}) is not an administrator.</p>
-          <Button className="cms-button primary" onClick={signOut}><LogOut /> Sign out</Button>
-        </div>
-      </div>
-    );
-
-  const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setDraft((d) => (d ? { ...d, [k]: v } : d));
+  const set = <K extends keyof ProjectDraft>(k: K, v: ProjectDraft[K]) => setDraft((d) => (d ? { ...d, [k]: v } : d));
 
   return (
     <div className="adm">

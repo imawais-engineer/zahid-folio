@@ -1,15 +1,34 @@
-// @lovable.dev/vite-tanstack-config already includes the following — do NOT add them manually
-// or the app will break with duplicate plugins:
-//   - TanStack devtools (dev-only, first), tanstackStart, viteReact, tailwindcss, tsConfigPaths,
-//     nitro (build-only using cloudflare as a default target), VITE_* env injection, @ path alias,
-//     React/TanStack dedupe, error logger plugins, and sandbox detection (port/host/strictPort).
-// You can pass additional config via defineConfig({ vite: { ... }, etc... }) if needed.
-import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+// Standard TanStack Start + Vite configuration (self-hosted build).
+// Replaces the Lovable-managed config wrapper with the equivalent plugins:
+//   - tailwindcss (styles.css imports "tailwindcss")
+//   - tsconfigPaths ("@/*" alias)
+//   - tanstackStart (server entry redirected to src/server.ts, the SSR error wrapper)
+//   - viteReact
+//   - nitro (build only; NITRO_PRESET=node-server selects the Node server output)
+import { defineConfig, type UserConfig } from "vite";
+import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import { nitro } from "nitro/vite";
+import viteReact from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import tsConfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  tanstackStart: {
-    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-    // nitro/vite builds from this
-    server: { entry: "server" },
+  plugins: [
+    tsConfigPaths({ projects: ["./tsconfig.json"] }),
+    tailwindcss(),
+    tanstackStart({
+      // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
+      server: { entry: "server" },
+    }),
+    viteReact(),
+    // Build-only; skipped on `vite dev`.
+    ...(process.env["NODE_ENV"] === "development" ? [] : [nitro({ defaultPreset: "node-server" })]),
+  ],
+  resolve: {
+    alias: { "@": `${process.cwd()}/src` },
+    dedupe: ["react", "react-dom", "@tanstack/react-query"],
   },
-});
+  optimizeDeps: {
+    include: ["react", "react-dom", "react-dom/client"],
+  },
+} as UserConfig);

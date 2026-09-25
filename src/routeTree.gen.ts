@@ -12,7 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ApiHealthRouteImport } from './routes/api/health'
 import { Route as ProjectsSlugRouteImport } from './routes/projects.$slug'
+import { Route as UploadsNameRouteImport } from './routes/uploads/$name'
+import { Route as ApiAdminProjectsRouteImport } from './routes/api/admin/projects'
+import { Route as ApiAdminUploadRouteImport } from './routes/api/admin/upload'
+import { Route as ApiAuthLoginRouteImport } from './routes/api/auth/login'
+import { Route as ApiAuthLogoutRouteImport } from './routes/api/auth/logout'
+import { Route as ApiAuthSessionRouteImport } from './routes/api/auth/session'
+import { Route as ApiPublicProjectsRouteImport } from './routes/api/public/projects'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -29,9 +37,49 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiHealthRoute = ApiHealthRouteImport.update({
+  id: '/api/health',
+  path: '/api/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProjectsSlugRoute = ProjectsSlugRouteImport.update({
   id: '/projects/$slug',
   path: '/projects/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UploadsNameRoute = UploadsNameRouteImport.update({
+  id: '/uploads/$name',
+  path: '/uploads/$name',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminProjectsRoute = ApiAdminProjectsRouteImport.update({
+  id: '/api/admin/projects',
+  path: '/api/admin/projects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminUploadRoute = ApiAdminUploadRouteImport.update({
+  id: '/api/admin/upload',
+  path: '/api/admin/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLoginRoute = ApiAuthLoginRouteImport.update({
+  id: '/api/auth/login',
+  path: '/api/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthLogoutRoute = ApiAuthLogoutRouteImport.update({
+  id: '/api/auth/logout',
+  path: '/api/auth/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSessionRoute = ApiAuthSessionRouteImport.update({
+  id: '/api/auth/session',
+  path: '/api/auth/session',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicProjectsRoute = ApiPublicProjectsRouteImport.update({
+  id: '/api/public/projects',
+  path: '/api/public/projects',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -39,34 +87,103 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/health': typeof ApiHealthRoute
   '/projects/$slug': typeof ProjectsSlugRoute
+  '/uploads/$name': typeof UploadsNameRoute
+  '/api/admin/projects': typeof ApiAdminProjectsRoute
+  '/api/admin/upload': typeof ApiAdminUploadRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/session': typeof ApiAuthSessionRoute
+  '/api/public/projects': typeof ApiPublicProjectsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/health': typeof ApiHealthRoute
   '/projects/$slug': typeof ProjectsSlugRoute
+  '/uploads/$name': typeof UploadsNameRoute
+  '/api/admin/projects': typeof ApiAdminProjectsRoute
+  '/api/admin/upload': typeof ApiAdminUploadRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/session': typeof ApiAuthSessionRoute
+  '/api/public/projects': typeof ApiPublicProjectsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/health': typeof ApiHealthRoute
   '/projects/$slug': typeof ProjectsSlugRoute
+  '/uploads/$name': typeof UploadsNameRoute
+  '/api/admin/projects': typeof ApiAdminProjectsRoute
+  '/api/admin/upload': typeof ApiAdminUploadRoute
+  '/api/auth/login': typeof ApiAuthLoginRoute
+  '/api/auth/logout': typeof ApiAuthLogoutRoute
+  '/api/auth/session': typeof ApiAuthSessionRoute
+  '/api/public/projects': typeof ApiPublicProjectsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/sitemap.xml' | '/projects/$slug'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/sitemap.xml'
+    | '/api/health'
+    | '/projects/$slug'
+    | '/uploads/$name'
+    | '/api/admin/projects'
+    | '/api/admin/upload'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/session'
+    | '/api/public/projects'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/sitemap.xml' | '/projects/$slug'
-  id: '__root__' | '/' | '/admin' | '/sitemap.xml' | '/projects/$slug'
+  to:
+    | '/'
+    | '/admin'
+    | '/sitemap.xml'
+    | '/api/health'
+    | '/projects/$slug'
+    | '/uploads/$name'
+    | '/api/admin/projects'
+    | '/api/admin/upload'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/session'
+    | '/api/public/projects'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/sitemap.xml'
+    | '/api/health'
+    | '/projects/$slug'
+    | '/uploads/$name'
+    | '/api/admin/projects'
+    | '/api/admin/upload'
+    | '/api/auth/login'
+    | '/api/auth/logout'
+    | '/api/auth/session'
+    | '/api/public/projects'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiHealthRoute: typeof ApiHealthRoute
   ProjectsSlugRoute: typeof ProjectsSlugRoute
+  UploadsNameRoute: typeof UploadsNameRoute
+  ApiAdminProjectsRoute: typeof ApiAdminProjectsRoute
+  ApiAdminUploadRoute: typeof ApiAdminUploadRoute
+  ApiAuthLoginRoute: typeof ApiAuthLoginRoute
+  ApiAuthLogoutRoute: typeof ApiAuthLogoutRoute
+  ApiAuthSessionRoute: typeof ApiAuthSessionRoute
+  ApiPublicProjectsRoute: typeof ApiPublicProjectsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -92,11 +209,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/health': {
+      id: '/api/health'
+      path: '/api/health'
+      fullPath: '/api/health'
+      preLoaderRoute: typeof ApiHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/projects/$slug': {
       id: '/projects/$slug'
       path: '/projects/$slug'
       fullPath: '/projects/$slug'
       preLoaderRoute: typeof ProjectsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/uploads/$name': {
+      id: '/uploads/$name'
+      path: '/uploads/$name'
+      fullPath: '/uploads/$name'
+      preLoaderRoute: typeof UploadsNameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/projects': {
+      id: '/api/admin/projects'
+      path: '/api/admin/projects'
+      fullPath: '/api/admin/projects'
+      preLoaderRoute: typeof ApiAdminProjectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/upload': {
+      id: '/api/admin/upload'
+      path: '/api/admin/upload'
+      fullPath: '/api/admin/upload'
+      preLoaderRoute: typeof ApiAdminUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/login': {
+      id: '/api/auth/login'
+      path: '/api/auth/login'
+      fullPath: '/api/auth/login'
+      preLoaderRoute: typeof ApiAuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/logout': {
+      id: '/api/auth/logout'
+      path: '/api/auth/logout'
+      fullPath: '/api/auth/logout'
+      preLoaderRoute: typeof ApiAuthLogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/session': {
+      id: '/api/auth/session'
+      path: '/api/auth/session'
+      fullPath: '/api/auth/session'
+      preLoaderRoute: typeof ApiAuthSessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/projects': {
+      id: '/api/public/projects'
+      path: '/api/public/projects'
+      fullPath: '/api/public/projects'
+      preLoaderRoute: typeof ApiPublicProjectsRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -106,7 +279,15 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiHealthRoute: ApiHealthRoute,
   ProjectsSlugRoute: ProjectsSlugRoute,
+  UploadsNameRoute: UploadsNameRoute,
+  ApiAdminProjectsRoute: ApiAdminProjectsRoute,
+  ApiAdminUploadRoute: ApiAdminUploadRoute,
+  ApiAuthLoginRoute: ApiAuthLoginRoute,
+  ApiAuthLogoutRoute: ApiAuthLogoutRoute,
+  ApiAuthSessionRoute: ApiAuthSessionRoute,
+  ApiPublicProjectsRoute: ApiPublicProjectsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

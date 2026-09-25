@@ -1,0 +1,68 @@
+# Self-hosted portfolio stack: application + dedicated PostgreSQL.
+# The app keeps its Traefik labels so the existing Traefik instance continues
+# to route https://alphainsights.consulting to it with zero Traefik changes.
+# PostgreSQL is reachable only inside the dedicated portfolio network —
+# it is never published to the host.
+
+services:
+  portfolio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: zahid-folio-portfolio:latest
+    container_name: alpha-insights-portfolio
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      UPLOAD_DIR: /app/uploads
+      POSTGRES_HOST: portfolio-postgres
+      POSTGRES_PORT: "5432"
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      portfolio-postgres:
+        condition: service_healthy
+    networks:
+      - portfolio
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.alpha-insights.entrypoints=websecure
+      - traefik.http.routers.alpha-insights.rule=Host(`alphainsights.consulting`)
+      - traefik.http.routers.alpha-insights.tls.certresolver=letsencrypt
+      - traefik.http.services.alpha-insights.loadbalancer.server.port=3000
+
+  portfolio-postgres:
+    image: postgres:17-alpine
+    container_name: alpha-insights-portfolio-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    networks:
+      - portfolio
+    # Deliberately NO `ports:` — the database is never exposed to the host
+    # or the public internet; only the portfolio app can reach it.
+
+volumes:
+  postgres_data:
+    name: alpha-insights-portfolio-postgres-data
+  uploads_data:
+    name: alpha-insights-portfolio-uploads
+
+networks:
+  portfolio:
+    name: alpha-insights-portfolio
+    driver: bridge
