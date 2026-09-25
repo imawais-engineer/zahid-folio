@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Landing } from "@/components/site/Landing";
 
 export const Route = createFileRoute("/clean")({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Alpha Insights | Strategic Finance & FP&A Advisory" },

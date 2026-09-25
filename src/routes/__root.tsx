@@ -73,14 +73,12 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  staticData: { sitemap: false },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Alpha Insights | Financial Clarity. Better Decisions." },
-      { name: "description", content: "Strategic FP&A, financial modelling, management reporting and CFO advisory by Chaudhary Zahid Ali." },
       { name: "author", content: "Alpha Insights" },
-      { property: "og:type", content: "website" },
       { property: "og:site_name", content: "Alpha Insights" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
