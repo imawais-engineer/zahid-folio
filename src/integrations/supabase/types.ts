@@ -110,6 +110,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      slugify: { Args: { txt: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "user"
