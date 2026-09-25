@@ -28,6 +28,7 @@ export type Database = {
           model_url: string | null
           platforms: string[]
           priority: number
+          public_enabled: boolean
           screenshots: string[]
           short: string
           slug: string | null
@@ -50,6 +51,7 @@ export type Database = {
           model_url?: string | null
           platforms?: string[]
           priority?: number
+          public_enabled?: boolean
           screenshots?: string[]
           short?: string
           slug?: string | null
@@ -72,6 +74,7 @@ export type Database = {
           model_url?: string | null
           platforms?: string[]
           priority?: number
+          public_enabled?: boolean
           screenshots?: string[]
           short?: string
           slug?: string | null
