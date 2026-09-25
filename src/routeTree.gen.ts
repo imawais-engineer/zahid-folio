@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AnonymousRouteImport } from './routes/anonymous'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CleanRouteImport } from './routes/clean'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ProjectsSlugRouteImport } from './routes/projects.$slug'
 
@@ -41,6 +42,11 @@ const CleanRoute = CleanRouteImport.update({
   path: '/clean',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/anonymous': typeof AnonymousRoute
   '/auth': typeof AuthRoute
   '/clean': typeof CleanRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/projects/$slug': typeof ProjectsSlugRoute
 }
@@ -65,6 +72,7 @@ export interface FileRoutesByTo {
   '/anonymous': typeof AnonymousRoute
   '/auth': typeof AuthRoute
   '/clean': typeof CleanRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/projects/$slug': typeof ProjectsSlugRoute
 }
@@ -75,15 +83,29 @@ export interface FileRoutesById {
   '/anonymous': typeof AnonymousRoute
   '/auth': typeof AuthRoute
   '/clean': typeof CleanRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/projects/$slug': typeof ProjectsSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/anonymous' | '/auth' | '/clean' | '/admin' | '/projects/$slug'
+    | '/'
+    | '/anonymous'
+    | '/auth'
+    | '/clean'
+    | '/sitemap.xml'
+    | '/admin'
+    | '/projects/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/anonymous' | '/auth' | '/clean' | '/admin' | '/projects/$slug'
+  to:
+    | '/'
+    | '/anonymous'
+    | '/auth'
+    | '/clean'
+    | '/sitemap.xml'
+    | '/admin'
+    | '/projects/$slug'
   id:
     | '__root__'
     | '/'
@@ -91,6 +113,7 @@ export interface FileRouteTypes {
     | '/anonymous'
     | '/auth'
     | '/clean'
+    | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/projects/$slug'
   fileRoutesById: FileRoutesById
@@ -101,6 +124,7 @@ export interface RootRouteChildren {
   AnonymousRoute: typeof AnonymousRoute
   AuthRoute: typeof AuthRoute
   CleanRoute: typeof CleanRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ProjectsSlugRoute: typeof ProjectsSlugRoute
 }
 
@@ -141,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CleanRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -175,6 +206,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnonymousRoute: AnonymousRoute,
   AuthRoute: AuthRoute,
   CleanRoute: CleanRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   ProjectsSlugRoute: ProjectsSlugRoute,
 }
 export const routeTree = rootRouteImport
