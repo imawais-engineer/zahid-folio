@@ -11,6 +11,8 @@ export const Route = createFileRoute("/_authenticated/admin")({
       { name: "description", content: "Manage Alpha Insights portfolio projects." },
       { property: "og:title", content: "Portfolio CMS | Alpha Insights" },
       { property: "og:description", content: "Manage Alpha Insights portfolio projects." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -22,7 +24,7 @@ type Draft = Omit<Project, "id" | "created_at" | "updated_at"> & { id?: string; 
 const empty = (priority: number): Draft => ({
   slug: null, title: "", short: "", platforms: [], capabilities: [], industries: [], tags: [],
   access: "interactive", thumbnail_url: null, screenshots: [], model_url: "", challenge: "",
-  approach: "", value: "", priority, featured: false,
+  approach: "", value: "", priority, featured: false, is_template: false,
 });
 
 function AdminPage() {
@@ -190,9 +192,9 @@ function AdminPage() {
                 onDrop={() => { drop(p.id); setDragId(null); setOverId(null); }}
                 className={`${draft?.id === p.id ? "active" : ""} ${overId === p.id ? "over" : ""}`}
               >
-                <span className="t" onClick={() => { setMsg(null); setSlugTouched(true); setDraft({ ...p }); }}>
-                  {p.featured && "★ "}{p.title}
-                </span>
+                  <button type="button" className="t" onClick={() => { setMsg(null); setSlugTouched(true); setDraft({ ...p }); }}>
+                    {p.featured && "★ "}{p.title}{p.is_template && <small className="template-badge">Template / Sample</small>}
+                  </button>
                 <button onClick={() => move(i, -1)} aria-label="Move up">↑</button>
                 <button onClick={() => move(i, 1)} aria-label="Move down">↓</button>
               </li>
@@ -206,6 +208,7 @@ function AdminPage() {
           ) : (
             <>
               <h2>{draft.id ? "Edit project" : "New project"}</h2>
+              {draft.is_template && <div className="template-notice"><strong>Template / Sample</strong><span>This starter project is a blueprint. Edit it with the real model and attachments, or delete it when ready.</span></div>}
               <label>Project title</label>
               <input value={draft.title} maxLength={200} onChange={(e) => { const v = e.target.value; setDraft((d) => d ? { ...d, title: v, slug: slugTouched ? d.slug : slugify(v) } : d); }} />
               <label>URL slug</label>
@@ -272,6 +275,9 @@ function AdminPage() {
                   </label>
                 </div>
               </div>
+              <label style={{ fontWeight: 400, display: "flex", gap: 8, alignItems: "center" }}>
+                <input type="checkbox" checked={draft.is_template} onChange={(e) => set("is_template", e.target.checked)} /> Mark as Template / Sample
+              </label>
               <div style={{ display: "flex", gap: 10, marginTop: 22, flexWrap: "wrap" }}>
                 <button className="abtn" onClick={save} disabled={busy}>{busy ? "Working…" : "Save project"}</button>
                 <button className="abtn ghost" onClick={() => setDraft(null)}>Cancel</button>
@@ -311,7 +317,7 @@ function TagField({ label, value, options, onChange }: { label: string; value: s
       />
       <datalist id={id}>{options.filter((o) => !value.includes(o)).map((o) => <option key={o} value={o} />)}</datalist>
       <div className="chips">
-        {value.map((t) => <span key={t} className="chip" onClick={() => onChange(value.filter((x) => x !== t))}>{t} ×</span>)}
+        {value.map((t) => <button type="button" key={t} className="chip" onClick={() => onChange(value.filter((x) => x !== t))}>{t} ×</button>)}
       </div>
       <div className="hint">Press Enter to add a new one. Click a tag to remove.</div>
     </div>

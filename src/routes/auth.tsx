@@ -6,9 +6,11 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Admin sign in | Alpha Insights" },
-      { name: "description", content: "Sign in to manage the Alpha Insights portfolio." },
+      { name: "description", content: "Secure sign in for the Alpha Insights portfolio administrator." },
       { property: "og:title", content: "Admin sign in | Alpha Insights" },
-      { property: "og:description", content: "Sign in to manage the Alpha Insights portfolio." },
+      { property: "og:description", content: "Secure sign in for the Alpha Insights portfolio administrator." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -17,7 +19,6 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const nav = useNavigate();
-  const [mode, setMode] = useState<"in" | "up">("in");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [msg, setMsg] = useState<{ t: string; err?: boolean } | null>(null);
@@ -27,19 +28,9 @@ function AuthPage() {
     e.preventDefault();
     setBusy(true);
     setMsg(null);
-    if (mode === "in") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setMsg({ t: error.message, err: true });
-      else nav({ to: "/admin" });
-    } else {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: `${window.location.origin}/admin` },
-      });
-      if (error) setMsg({ t: error.message, err: true });
-      else setMsg({ t: "Account created. Check your email to confirm, then sign in." });
-    }
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) setMsg({ t: "Email or password is incorrect.", err: true });
+    else nav({ to: "/admin" });
     setBusy(false);
   }
 
@@ -47,16 +38,13 @@ function AuthPage() {
     <div className="adm">
       <form className="auth-box" onSubmit={submit}>
         <h1 style={{ margin: 0 }}>Portfolio Admin</h1>
-        <p className="hint">{mode === "in" ? "Sign in to manage portfolio projects." : "The first account created becomes the site administrator."}</p>
+        <p className="hint">Authorized administrators only.</p>
         <label>Email</label>
         <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
         <label>Password</label>
-        <input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === "in" ? "current-password" : "new-password"} />
-        <div style={{ marginTop: 20, display: "flex", gap: 10, alignItems: "center" }}>
-          <button className="abtn wine" disabled={busy}>{mode === "in" ? "Sign in" : "Create account"}</button>
-          <button type="button" className="abtn ghost" onClick={() => setMode(mode === "in" ? "up" : "in")}>
-            {mode === "in" ? "Create account" : "Back to sign in"}
-          </button>
+        <input type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
+        <div style={{ marginTop: 20 }}>
+          <button className="abtn wine" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
         </div>
         {msg && <div className={`msg ${msg.err ? "err" : ""}`}>{msg.t}</div>}
       </form>

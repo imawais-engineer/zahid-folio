@@ -8,6 +8,8 @@ export const Route = createFileRoute("/clean")({
       { name: "description", content: "FP&A, financial modelling, management reporting and corporate finance advisory from Alpha Insights." },
       { property: "og:title", content: "Alpha Insights | Strategic Finance & FP&A Advisory" },
       { property: "og:description", content: "FP&A, financial modelling, management reporting and corporate finance advisory." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: () => <Landing showPhoto={false} />,

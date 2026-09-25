@@ -16,6 +16,15 @@ export function Brandmark() {
   );
 }
 
+function CorporateMark({ company, qualification, kind }: { company: string; qualification: string; kind: string }) {
+  return (
+    <div className={`corporate-mark ${kind}`}>
+      <span className="corporate-symbol" aria-hidden="true"><i /><i /><i /></span>
+      <span className="corporate-copy"><strong>{company}</strong><small>{qualification}</small></span>
+    </div>
+  );
+}
+
 export function Landing({ showPhoto }: { showPhoto: boolean }) {
   const [navOpen, setNavOpen] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -33,7 +42,7 @@ export function Landing({ showPhoto }: { showPhoto: boolean }) {
             <small>FINANCE · MODELLING · ADVISORY</small>
           </span>
         </a>
-        <button className="menu-toggle" aria-label="Open navigation" onClick={() => setNavOpen((o) => !o)}>
+        <button className="menu-toggle" aria-label="Open navigation" aria-expanded={navOpen} onClick={() => setNavOpen((o) => !o)}>
           ☰
         </button>
         <nav className={`nav ${navOpen ? "open" : ""}`} onClick={() => setNavOpen(false)}>
@@ -111,14 +120,11 @@ export function Landing({ showPhoto }: { showPhoto: boolean }) {
         <section className="trusted">
           <p className="eyebrow">EXPERIENCE ACROSS LEADING ORGANISATIONS</p>
           <div className="wordmarks logo-row">
-            <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/PwC%20Company%20Logo.svg" alt="PwC logo" />
-            <div className="panda-logo official-style" aria-label="Panda Retail Company">
-              <span className="panda-mark"><i /></span>
-              <span className="panda-name"><span className="arabic">بنده</span><strong>Panda</strong></span>
-            </div>
-            <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Domino%27s%202025.svg" alt="Domino's logo" />
-            <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Sixt%20Logo%202023.svg" alt="SIXT logo" />
-            <img src="https://commons.wikimedia.org/wiki/Special:Redirect/file/Petronas%202013%20logo.svg" alt="PETRONAS logo" />
+            <CorporateMark kind="pwc-mark" company="PwC" qualification="Audit & Assurance" />
+            <CorporateMark kind="panda-corporate-mark" company="Panda" qualification="Panda Retail Company" />
+            <CorporateMark kind="alamar-mark" company="Alamar Foods" qualification="Domino's Master Franchisee" />
+            <CorporateMark kind="sixt-mark" company="SIXT · Samara" qualification="Mobility & Leasing" />
+            <CorporateMark kind="petronas-mark" company="United Fuel Co." qualification="PETRONAS Partner" />
           </div>
           <p className="fine">
             Career experience includes PwC, Panda, Alamar Foods (master franchisee of Domino’s Pizza), SIXT/Samara, and
@@ -312,8 +318,8 @@ function Portfolio({ projects, loading, onOpen }: { projects: Project[]; loading
               <span className="eyebrow gold">{String(i + 1).padStart(2, "0")}</span>
               <h3>{p.title}</h3>
               <p>{p.short}</p>
-              <span style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
-                <a href="#work" onClick={(e) => e.preventDefault()}>Quick view →</a>
+              <span className="project-links">
+                <span>Quick view →</span>
                 {p.slug && <Link to="/projects/$slug" params={{ slug: p.slug }} onClick={(e) => e.stopPropagation()}>View Full Case Study →</Link>}
               </span>
             </div>

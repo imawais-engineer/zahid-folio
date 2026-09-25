@@ -6,7 +6,8 @@ export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async () => {
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) throw redirect({ to: "/auth" });
-    return { user: data.user };
+    const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    return { user: data.user, assuranceLevel: assurance?.currentLevel ?? "aal1" };
   },
   component: () => <Outlet />,
 });

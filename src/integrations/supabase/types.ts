@@ -24,6 +24,7 @@ export type Database = {
           featured: boolean
           id: string
           industries: string[]
+          is_template: boolean
           model_url: string | null
           platforms: string[]
           priority: number
@@ -45,6 +46,7 @@ export type Database = {
           featured?: boolean
           id?: string
           industries?: string[]
+          is_template?: boolean
           model_url?: string | null
           platforms?: string[]
           priority?: number
@@ -66,6 +68,7 @@ export type Database = {
           featured?: boolean
           id?: string
           industries?: string[]
+          is_template?: boolean
           model_url?: string | null
           platforms?: string[]
           priority?: number
