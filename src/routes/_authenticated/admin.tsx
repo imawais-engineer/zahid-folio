@@ -67,7 +67,7 @@ function AdminPage() {
     const j = idx + dir;
     if (j < 0 || j >= projects.length) return;
     const arr = [...projects];
-    [arr[idx], arr[j]] = [arr[j], arr[idx]];
+    [arr[idx], arr[j]] = [arr[j]!, arr[idx]!];
     reorder(arr);
   }
 
@@ -76,7 +76,7 @@ function AdminPage() {
     const arr = [...projects];
     const from = arr.findIndex((p) => p.id === dragId);
     const [item] = arr.splice(from, 1);
-    arr.splice(arr.findIndex((p) => p.id === targetId), 0, item);
+    if (item) arr.splice(arr.findIndex((p) => p.id === targetId), 0, item);
     reorder(arr);
   }
 
