@@ -1,4 +1,5 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import type { User } from "@supabase/supabase-js";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
@@ -27,8 +28,13 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export const Route = createFileRoute("/_authenticated/admin")({
+export const Route = createFileRoute("/admin")({
   staticData: { sitemap: false },
+  ssr: false,
+  beforeLoad: async () => {
+    const { data, error } = await supabase.auth.getUser();
+    return { user: error ? null : data.user };
+  },
   head: () => ({
     meta: [
       { title: "Portfolio CMS | Alpha Insights" },
@@ -40,8 +46,62 @@ export const Route = createFileRoute("/_authenticated/admin")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: AdminPage,
+  component: AdminGate,
 });
+
+function AdminGate() {
+  const { user } = Route.useRouteContext();
+  return user ? <AdminPage user={user} /> : <SignIn />;
+}
+
+function SignIn() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [fails, setFails] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState(0);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (Date.now() < lockedUntil) {
+      setErr("Too many attempts. Please wait a minute and try again.");
+      return;
+    }
+    setBusy(true);
+    setErr(null);
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    setPassword("");
+    if (error) {
+      const n = fails + 1;
+      setFails(n);
+      if (n >= 5) { setLockedUntil(Date.now() + 60_000); setFails(0); }
+      setErr("Email or password is incorrect.");
+      setBusy(false);
+      return;
+    }
+    setBusy(false);
+    await router.invalidate();
+  }
+
+  return (
+    <div className="adm">
+      <form className="auth-box" onSubmit={submit}>
+        <h1 style={{ margin: 0 }}>Portfolio Admin</h1>
+        <p className="hint">Authorized administrators only.</p>
+        <label htmlFor="adm-email">Email</label>
+        <input id="adm-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="username" />
+        <label htmlFor="adm-pass">Password</label>
+        <input id="adm-pass" type="password" required minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
+        <div style={{ marginTop: 20 }}>
+          <button className="abtn wine" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button>
+        </div>
+        {err && <div className="msg err" role="alert">{err}</div>}
+      </form>
+    </div>
+  );
+}
 
 type Draft = Omit<Project, "id" | "created_at" | "updated_at"> & { id?: string; updated_at?: string };
 
@@ -52,10 +112,9 @@ const empty = (priority: number): Draft => ({
   public_enabled: true,
 });
 
-function AdminPage() {
+function AdminPage({ user }: { user: User }) {
   const qc = useQueryClient();
-  const nav = useNavigate();
-  const { user } = Route.useRouteContext();
+  const router = useRouter();
   const { data: isAdmin, isLoading: roleLoading } = useQuery({
     queryKey: ["is-admin", user.id],
     queryFn: async () => {
@@ -75,7 +134,7 @@ function AdminPage() {
     await qc.cancelQueries();
     qc.clear();
     await supabase.auth.signOut();
-    nav({ to: "/auth", replace: true });
+    await router.invalidate();
   }
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["projects"] });
