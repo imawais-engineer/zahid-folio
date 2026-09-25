@@ -90,7 +90,7 @@ function ProjectPage() {
       ? "The full model is shared privately on request. Selected views are shown below."
       : p.access === "preview"
         ? "Selected model views are shown without exposing the underlying workbook."
-        : "Explore the live model directly below.";
+        : p.model_url ? "Explore the live model alongside." : "The live model link will be connected here shortly.";
 
   return (
     <Shell>
