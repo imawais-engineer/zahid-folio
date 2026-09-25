@@ -9,4 +9,4 @@
 - [x] Add database-enforced public visibility for portfolio projects
 - [x] Add immediate CMS enable/disable controls and visibility status
 - [x] Modernize all CMS form controls and actions
-- [ ] Verify hidden projects across public and admin views
+- [x] Verify hidden projects across public and admin views
