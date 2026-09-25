@@ -20,7 +20,11 @@ export const projectsQuery = queryOptions({
   },
 });
 
-export const CFO_PACK_SLUG = "cfo-pack";
+export const CFO_PACK_SLUG = "cfo-fp-a-capability-pack";
+
+export function slugify(s: string) {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
 
 export function uniqueValues(list: Project[], key: "platforms" | "capabilities" | "industries" | "tags") {
   return Array.from(new Set(list.flatMap((p) => p[key]))).sort((a, b) => a.localeCompare(b));

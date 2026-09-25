@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { accessLabel, CFO_PACK_SLUG, projectsQuery, uniqueValues, type Project } from "@/lib/projects";
 import heroImg from "@/assets/zahid-hero-clean.jpg";
@@ -6,7 +7,7 @@ import aboutImg from "@/assets/zahid-about.jpg";
 
 const EMAIL = "mailto:zahid@alphainsights.consulting";
 
-function Brandmark() {
+export function Brandmark() {
   return (
     <svg className="brandmark" viewBox="0 0 72 72" aria-hidden>
       <path d="M8 58 29 10h9L18 58H8Zm25 0 15-34 16 34H53l-4-10H35l-4 10H20Zm5-18h8l-4-10-4 10Z" />
@@ -311,7 +312,10 @@ function Portfolio({ projects, loading, onOpen }: { projects: Project[]; loading
               <span className="eyebrow gold">{String(i + 1).padStart(2, "0")}</span>
               <h3>{p.title}</h3>
               <p>{p.short}</p>
-              <a href="#work" onClick={(e) => e.preventDefault()}>Explore Project →</a>
+              <span style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+                <a href="#work" onClick={(e) => e.preventDefault()}>Quick view →</a>
+                {p.slug && <Link to="/projects/$slug" params={{ slug: p.slug }} onClick={(e) => e.stopPropagation()}>View Full Case Study →</Link>}
+              </span>
             </div>
           </article>
         ))}
@@ -358,6 +362,7 @@ function ProjectModal({ p, onClose }: { p: Project; onClose: () => void }) {
             <h3>Capabilities</h3>
             <div>{[...p.capabilities, ...p.tags].map((t) => <span key={t} className="tag">{t}</span>)}</div>
             <div className="access-note"><strong>{accessLabel(p.access)}</strong><span>{note}</span></div>
+            {p.slug && <Link className="btn goldbtn" style={{ marginTop: 18 }} to="/projects/$slug" params={{ slug: p.slug }}>View Full Case Study →</Link>}
           </div>
           <div>
             <div className="model-frame">
