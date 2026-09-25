@@ -11,6 +11,8 @@ export const Route = createFileRoute("/_authenticated/admin")({
       { name: "description", content: "Manage Alpha Insights portfolio projects." },
       { property: "og:title", content: "Portfolio CMS | Alpha Insights" },
       { property: "og:description", content: "Manage Alpha Insights portfolio projects." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },
     ],
   }),

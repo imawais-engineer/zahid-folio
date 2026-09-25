@@ -8,6 +8,8 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Independent finance advisory led by Chaudhary Zahid Ali, ACCA, CMA, MBA." },
       { property: "og:title", content: "Alpha Insights | FP&A, Financial Modelling & CFO Advisory" },
       { property: "og:description", content: "Independent finance advisory led by Chaudhary Zahid Ali, ACCA, CMA, MBA." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: () => <Landing showPhoto />,
