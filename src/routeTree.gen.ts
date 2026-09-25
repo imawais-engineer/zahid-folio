@@ -11,10 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as AnonymousRouteImport } from './routes/anonymous'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as CleanRouteImport } from './routes/clean'
-import { Route as FractionalCfoRouteImport } from './routes/fractional-cfo'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as ProjectsSlugRouteImport } from './routes/projects.$slug'
@@ -28,24 +25,9 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AnonymousRoute = AnonymousRouteImport.update({
-  id: '/anonymous',
-  path: '/anonymous',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CleanRoute = CleanRouteImport.update({
-  id: '/clean',
-  path: '/clean',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const FractionalCfoRoute = FractionalCfoRouteImport.update({
-  id: '/fractional-cfo',
-  path: '/fractional-cfo',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -66,20 +48,14 @@ const ProjectsSlugRoute = ProjectsSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/anonymous': typeof AnonymousRoute
   '/auth': typeof AuthRoute
-  '/clean': typeof CleanRoute
-  '/fractional-cfo': typeof FractionalCfoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/projects/$slug': typeof ProjectsSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/anonymous': typeof AnonymousRoute
   '/auth': typeof AuthRoute
-  '/clean': typeof CleanRoute
-  '/fractional-cfo': typeof FractionalCfoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/projects/$slug': typeof ProjectsSlugRoute
@@ -88,43 +64,21 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/anonymous': typeof AnonymousRoute
   '/auth': typeof AuthRoute
-  '/clean': typeof CleanRoute
-  '/fractional-cfo': typeof FractionalCfoRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/projects/$slug': typeof ProjectsSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/anonymous'
-    | '/auth'
-    | '/clean'
-    | '/fractional-cfo'
-    | '/sitemap.xml'
-    | '/admin'
-    | '/projects/$slug'
+  fullPaths: '/' | '/auth' | '/sitemap.xml' | '/admin' | '/projects/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/anonymous'
-    | '/auth'
-    | '/clean'
-    | '/fractional-cfo'
-    | '/sitemap.xml'
-    | '/admin'
-    | '/projects/$slug'
+  to: '/' | '/auth' | '/sitemap.xml' | '/admin' | '/projects/$slug'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
-    | '/anonymous'
     | '/auth'
-    | '/clean'
-    | '/fractional-cfo'
     | '/sitemap.xml'
     | '/_authenticated/admin'
     | '/projects/$slug'
@@ -133,10 +87,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  AnonymousRoute: typeof AnonymousRoute
   AuthRoute: typeof AuthRoute
-  CleanRoute: typeof CleanRoute
-  FractionalCfoRoute: typeof FractionalCfoRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ProjectsSlugRoute: typeof ProjectsSlugRoute
 }
@@ -157,32 +108,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/anonymous': {
-      id: '/anonymous'
-      path: '/anonymous'
-      fullPath: '/anonymous'
-      preLoaderRoute: typeof AnonymousRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/clean': {
-      id: '/clean'
-      path: '/clean'
-      fullPath: '/clean'
-      preLoaderRoute: typeof CleanRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/fractional-cfo': {
-      id: '/fractional-cfo'
-      path: '/fractional-cfo'
-      fullPath: '/fractional-cfo'
-      preLoaderRoute: typeof FractionalCfoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -223,10 +153,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  AnonymousRoute: AnonymousRoute,
   AuthRoute: AuthRoute,
-  CleanRoute: CleanRoute,
-  FractionalCfoRoute: FractionalCfoRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ProjectsSlugRoute: ProjectsSlugRoute,
 }
