@@ -12,3 +12,4 @@
 - [x] Verify hidden projects across public and admin views
 - [x] Save client roadmap as ZAHID-ROADMAP.md in repo root
 - [x] Remove extra pages (/clean, /anonymous, /fractional-cfo); keep homepage + admin
+- [x] Merge sign-in into /admin (single admin page)

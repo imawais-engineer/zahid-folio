@@ -9,7 +9,7 @@ clone → authenticate → database attach → build → domain + SSL → auto-d
 
 ## 0. Admin Access (Ready to Test)
 
-- **Login URL:** `/auth` (navigating to `/admin` redirects there)
+- **Login URL:** `/admin` (navigating to `/admin` redirects there)
 - **Admin Email:** `czahidali@gmail.com`
 - **Temporary Password:** `Zahid@Finance786` — change this in production before going live
 - Public sign-up / self-registration is **disabled**; no outside visitor can create an account.
@@ -214,7 +214,7 @@ For fully hands-free deployments, add a GitHub webhook (repo → Settings → We
 
 ## 8. Post-Launch Checklist
 
-- [ ] Change the temporary admin password (sign in at `/auth` → update credentials).
+- [ ] Change the temporary admin password (sign in at `/admin` → update credentials).
 - [ ] Confirm disabled projects are hidden from `/`, `/clean`, and `/projects/:slug`.
 - [ ] Replace the 8 template/sample projects with real case studies in `/admin`.
 - [ ] Verify `https://yourdomain.com` loads with a valid certificate.
