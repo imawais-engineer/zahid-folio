@@ -186,7 +186,11 @@ function AdminPage() {
     qc.setQueryData<Project[]>(projectsQuery.queryKey, (current) =>
       current?.map((item) => (item.id === data.id ? data : item)),
     );
-    setDraft((current) => (current?.id === data.id ? { ...data } : current));
+    setDraft((current) =>
+      current?.id === data.id
+        ? { ...current, public_enabled: data.public_enabled, updated_at: data.updated_at }
+        : current,
+    );
     setMsg({
       t: enabled
         ? `“${data.title}” is now enabled and available on the public site.`
@@ -283,7 +287,11 @@ function AdminPage() {
                <div className="editor-heading"><div><p className="cms-kicker">{draft.id ? "Portfolio entry" : "Create entry"}</p><h2>{draft.id ? "Edit project" : "New project"}</h2></div><span className={`visibility-pill large ${draft.public_enabled ? "enabled" : "disabled"}`}>{draft.public_enabled ? <><Eye /> Public</> : <><EyeOff /> Disabled</>}</span></div>
                <div className={`visibility-control ${draft.public_enabled ? "enabled" : "disabled"}`}>
                  <div><strong>{draft.public_enabled ? "Public view enabled" : "Public view disabled"}</strong><span>{draft.public_enabled ? "This project is available on the website and at its direct link." : "This project remains editable here but is hidden from every public page and direct link."}</span></div>
-                 <div className="visibility-action"><span>{draft.public_enabled ? "Enabled" : "Disabled"}</span><Switch checked={draft.public_enabled} onCheckedChange={(checked) => set("public_enabled", checked)} aria-label="Enable or disable public view" /></div>
+                 <div className="visibility-action"><span>{draft.public_enabled ? "Enabled" : "Disabled"}</span><Switch checked={draft.public_enabled} disabled={busy} onCheckedChange={(checked) => {
+                   const saved = projects.find((project) => project.id === draft.id);
+                   if (saved) void setPublicVisibility(saved, checked);
+                   else set("public_enabled", checked);
+                 }} aria-label="Enable or disable public view" /></div>
                </div>
               {draft.is_template && <div className="template-notice"><strong>Template / Sample</strong><span>This starter project is a blueprint. Edit it with the real model and attachments, or delete it when ready.</span></div>}
                <Label>Project title</Label>
