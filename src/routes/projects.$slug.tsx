@@ -11,6 +11,7 @@ const projectQuery = (slug: string) =>
   queryOptions({ queryKey: ["project", slug], queryFn: () => getProjectBySlug({ data: { slug } }) });
 
 export const Route = createFileRoute("/projects/$slug")({
+  staticData: { sitemap: true },
   loader: async ({ params, context }) => {
     const p = await context.queryClient.ensureQueryData(projectQuery(params.slug));
     if (!p) throw notFound();
@@ -111,12 +112,12 @@ function ProjectPage() {
 
       <section className="modal-grid case-grid">
         <div>
-          <h3>Business challenge</h3><p>{p.challenge}</p>
-          <h3>Approach</h3><p>{p.approach}</p>
-          <h3>Business value</h3><p>{p.value}</p>
-          <h3>Capabilities</h3>
+          <h2>Business challenge</h2><p>{p.challenge}</p>
+          <h2>Approach</h2><p>{p.approach}</p>
+          <h2>Business value</h2><p>{p.value}</p>
+          <h2>Capabilities</h2>
           <div>{p.capabilities.map((t) => <span key={t} className="tag">{t}</span>)}</div>
-          {p.tags.length > 0 && (<><h3>Skills</h3><div>{p.tags.map((t) => <span key={t} className="tag">{t}</span>)}</div></>)}
+          {p.tags.length > 0 && (<><h2>Skills</h2><div>{p.tags.map((t) => <span key={t} className="tag">{t}</span>)}</div></>)}
           <div className="access-note"><strong>{accessLabel(p.access)}</strong><span>{note}</span></div>
           <a className="btn goldbtn" style={{ marginTop: 20 }} href={`${EMAIL}?subject=${encodeURIComponent(`Enquiry: ${p.title}`)}`}>Discuss a Similar Project →</a>
         </div>
@@ -139,7 +140,7 @@ function ProjectPage() {
           )}
           {gallery.length > 0 && (
             <>
-              <h3>Screenshots</h3>
+              <h2>Screenshots</h2>
               <div className="screenshot-strip">
                 {gallery.map((s, i) => (
                   <button key={s} className="plain" onClick={() => setLightbox(i)} aria-label={`Open screenshot ${i + 1}`}>
