@@ -15,6 +15,7 @@ import { Route as AnonymousRouteImport } from './routes/anonymous'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CleanRouteImport } from './routes/clean'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as ProjectsSlugRouteImport } from './routes/projects.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -45,6 +46,11 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ProjectsSlugRoute = ProjectsSlugRouteImport.update({
+  id: '/projects/$slug',
+  path: '/projects/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/clean': typeof CleanRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/projects/$slug': typeof ProjectsSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/clean': typeof CleanRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/projects/$slug': typeof ProjectsSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -68,12 +76,14 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/clean': typeof CleanRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/projects/$slug': typeof ProjectsSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/anonymous' | '/auth' | '/clean' | '/admin'
+  fullPaths:
+    '/' | '/anonymous' | '/auth' | '/clean' | '/admin' | '/projects/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/anonymous' | '/auth' | '/clean' | '/admin'
+  to: '/' | '/anonymous' | '/auth' | '/clean' | '/admin' | '/projects/$slug'
   id:
     | '__root__'
     | '/'
@@ -82,6 +92,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/clean'
     | '/_authenticated/admin'
+    | '/projects/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -90,6 +101,7 @@ export interface RootRouteChildren {
   AnonymousRoute: typeof AnonymousRoute
   AuthRoute: typeof AuthRoute
   CleanRoute: typeof CleanRoute
+  ProjectsSlugRoute: typeof ProjectsSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -136,6 +148,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/projects/$slug': {
+      id: '/projects/$slug'
+      path: '/projects/$slug'
+      fullPath: '/projects/$slug'
+      preLoaderRoute: typeof ProjectsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -156,6 +175,7 @@ const rootRouteChildren: RootRouteChildren = {
   AnonymousRoute: AnonymousRoute,
   AuthRoute: AuthRoute,
   CleanRoute: CleanRoute,
+  ProjectsSlugRoute: ProjectsSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
