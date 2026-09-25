@@ -10,3 +10,4 @@
 - [x] Add immediate CMS enable/disable controls and visibility status
 - [x] Modernize all CMS form controls and actions
 - [x] Verify hidden projects across public and admin views
+- [x] Save client roadmap as ZAHID-ROADMAP.md in repo root
