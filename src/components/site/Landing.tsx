@@ -112,8 +112,6 @@ export function Landing({ showPhoto }: { showPhoto: boolean }) {
                 <span>{String(i + 1).padStart(2, "0")}</span>
                 <h3>{t}</h3>
                 <p>{d}</p>
-                {t === "CFO Advisory" && (
-                )}
               </article>
             ))}
           </div>
